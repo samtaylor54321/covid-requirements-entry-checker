@@ -1,5 +1,7 @@
+import pandas as pd
 import pytest
-from main import extract_covid_requirements
+import numpy as np
+from main import extract_covid_requirements, build_foreign_travel_advice_dataset
 
 
 @pytest.fixture
@@ -14,11 +16,39 @@ def example_html_requirements_not_present():
     return example_text
 
 
+@pytest.fixture
+def example_country_urls():
+    example_country_urls = {
+        "Greece": "https://www.gov.uk/api/content/foreign-travel-advice/greece",
+        "Sweden": "https://www.gov.uk/api/content/foreign-travel-advice/sweden",
+        "Thailand": "https://www.gov.uk/api/content/foreign-travel-advice/thailand",
+    }
+    return example_country_urls
+
+
+@pytest.fixture
+def example_country_urls_malformed():
+    example_country_urls_malformed = {
+        "Greece": "https://www.gov.uk/api/content/foreign-travel-advice/greece",
+        "Sweden": "https://www.gov.uk/api/content/foreign-travel-advice/sweden",
+        "Thailand": "This is a missing or malformed url",
+    }
+    return example_country_urls_malformed
+
+
 class TestExtractCovidRequirements:
+    """Test suite for extracting entry requirements for a given country"""
+
     def test_extract_covid_requirements_string_present(
         self, example_html_requirements_present
     ):
+        """Test to ensure that the correct data is extracted if the text
+        is present"""
+
+        # Example string
         example_result = """<h3 id="entry-to-sierra-leone">Entry to Sierra Leone</h3>\n\n<p>From 27 September 2021, all unvaccinated passengers traveling into Sierra Leone will be required to undergo mandatory quarantine at your own cost until you have proof of a negative PCR result.</p>\n\n<p>Before travelling Sierra Leone, you must <a rel="external" href="https://www.travel.gov.sl/">get authorisation from the Government of Sierra Leone through the online portal</a>.</p>\n\n<p>To get authorisation you must have:</p>\n\n<ul>\n  <li>proof of a negative PCR COVID-19 test result no more than 72 hours before the departure time of your flight to Sierra Leone;</li>\n  <li>you should not use the NHS testing service to get a test in order to facilitate your travel to another country. You should arrange to take a private test;</li>\n  <li>a pre-departure public health passenger locator form;</li>\n  <li>and proof of payment for on arrival COVID-19 tests paid for through the portal</li>\n</ul>\n\n<p>Arrivals whose stay in the country does not exceed 5 days do not require to be tested again before leaving the country. However passengers are required to request a certificate of the negative PCR test result that was administered to them when they arrived in Sierra Leone.</p>"""
+
+        # Check that the correct text is extracted from the string
         assert extract_covid_requirements(example_html_requirements_present).replace(
             "\n", ""
         ) == example_result.replace("\n", "")
@@ -26,7 +56,49 @@ class TestExtractCovidRequirements:
     def test_extract_covid_requirements_string_not_present(
         self, example_html_requirements_not_present
     ):
+        """Test to ensure that the error handling works when there are
+        no specified entry requirements"""
+
+        # Check that if the text doesn't contain the string that it's correctly handled.
         assert (
             extract_covid_requirements(example_html_requirements_not_present)
             == "No entry rules in response to coronavirus are listed"
         )
+
+
+class TestBuildForeignTravelAdviceDataset:
+    """Test suite for Build Foreign Travel Advice Dataset function"""
+
+    def test_build_foreign_travel_advice_dataset(self, example_country_urls):
+        """Tests that the output of the function is correct when all necessary
+        data is present"""
+
+        # Parse test data which contains no errors
+        test_data = pd.read_csv("test_data.csv")
+
+        foreign_advice_dataset = build_foreign_travel_advice_dataset(
+            example_country_urls
+        )
+
+        # Check that results of the malformed url are processed correctly
+        assert np.all(
+            foreign_advice_dataset.columns.values == test_data.columns.values
+        ) and np.all(foreign_advice_dataset["name"] == test_data["name"])
+
+    def test_build_foreign_travel_advice_data_malformed(
+        self, example_country_urls_malformed
+    ):
+        """Tests the exeception handling for this function when url is missing"""
+
+        # Parse test data with malformed example
+        test_data = pd.read_csv("test_data_malformed.csv")
+
+        # Build foreign advice dataset
+        foreign_advice_dataset = build_foreign_travel_advice_dataset(
+            example_country_urls_malformed
+        )
+
+        # Check that results of the malformed url are processed correctly
+        assert np.all(
+            foreign_advice_dataset.columns.values == test_data.columns.values
+        ) and np.all(foreign_advice_dataset["name"] == test_data["name"])
