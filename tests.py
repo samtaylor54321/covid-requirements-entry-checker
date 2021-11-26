@@ -74,7 +74,7 @@ class TestBuildForeignTravelAdviceDataset:
         data is present"""
 
         # Parse test data which contains no errors
-        test_data = pd.read_csv("test_data.csv")
+        test_data = pd.read_csv("test_data/test_data.csv")
 
         foreign_advice_dataset = build_foreign_travel_advice_dataset(
             example_country_urls
@@ -91,7 +91,7 @@ class TestBuildForeignTravelAdviceDataset:
         """Tests the exeception handling for this function when url is missing"""
 
         # Parse test data with malformed example
-        test_data = pd.read_csv("test_data_malformed.csv")
+        test_data = pd.read_csv("test_data/test_data_malformed.csv")
 
         # Build foreign advice dataset
         foreign_advice_dataset = build_foreign_travel_advice_dataset(

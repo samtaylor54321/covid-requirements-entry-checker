@@ -101,10 +101,12 @@ res = json.loads(html.content)
 countries = {}
 
 for doc in res["links"]["children"]:
+    print(doc["api_url"])
     countries[doc["details"]["country"]["name"]] = doc["api_url"]
 
 # Build dataset of foreign travel advice
 dataset = build_foreign_travel_advice_dataset(countries)
+print("dataset built")
 
 # Extract COVID entry requirements from html
 dataset["entry-requirements"] = dataset["entry-requirements"].apply(
@@ -123,12 +125,14 @@ def index():
     url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data"
     country_shapes = f"{url}/world-countries.json"
 
+    print("map data loaded")
     # Parse geodata and combine with foreign office travel advice data
     geoJSON_df = gpd.read_file(country_shapes)
     final_df = geoJSON_df.merge(
         dataset[["name", "value", "entry-requirements"]], on="name"
     )
 
+    print("map data combined")
     # Instantiate map
     the_map = folium.Map(tiles="cartodbpositron", location=[40, 34], zoom_start=2)
 
@@ -159,6 +163,7 @@ def index():
             localize=True,
         )
     )
+    print("map_built")
     return the_map._repr_html_()
 
 
