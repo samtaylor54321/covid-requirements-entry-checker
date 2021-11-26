@@ -94,27 +94,27 @@ def build_foreign_travel_advice_dataset(country_urls: dict) -> pd.DataFrame:
 
 
 # Call data from API
-html = requests.get("https://www.gov.uk/api/content/foreign-travel-advice")
-res = json.loads(html.content)
+travel_advice_html = requests.get(
+    "https://www.gov.uk/api/content/foreign-travel-advice"
+)
+travel_advice_res = json.loads(travel_advice_html.content)
 
 # Parse through JSON to find country links
 countries = {}
 
-for doc in res["links"]["children"]:
-    print(doc["api_url"])
+for doc in travel_advice_res["links"]["children"]:
     countries[doc["details"]["country"]["name"]] = doc["api_url"]
 
 # Build dataset of foreign travel advice
-dataset = build_foreign_travel_advice_dataset(countries)
-print("dataset built")
+travel_advice_dataset = build_foreign_travel_advice_dataset(countries)
 
 # Extract COVID entry requirements from html
-dataset["entry-requirements"] = dataset["entry-requirements"].apply(
-    lambda x: extract_covid_requirements(x)
-)
+travel_advice_dataset["entry-requirements"] = travel_advice_dataset[
+    "entry-requirements"
+].apply(lambda x: extract_covid_requirements(x))
 
 # Extract basic values to visualise on map
-dataset["value"] = dataset["entry-requirements"].apply(
+travel_advice_dataset["value"] = travel_advice_dataset["entry-requirements"].apply(
     lambda x: 0 if x == "No entry rules in response to coronavirus are listed" else 100
 )
 
@@ -125,14 +125,12 @@ def index():
     url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data"
     country_shapes = f"{url}/world-countries.json"
 
-    print("map data loaded")
     # Parse geodata and combine with foreign office travel advice data
     geoJSON_df = gpd.read_file(country_shapes)
     final_df = geoJSON_df.merge(
-        dataset[["name", "value", "entry-requirements"]], on="name"
+        travel_advice_dataset[["name", "value", "entry-requirements"]], on="name"
     )
 
-    print("map data combined")
     # Instantiate map
     the_map = folium.Map(tiles="cartodbpositron", location=[40, 34], zoom_start=2)
 
@@ -163,7 +161,7 @@ def index():
             localize=True,
         )
     )
-    print("map_built")
+
     return the_map._repr_html_()
 
 
