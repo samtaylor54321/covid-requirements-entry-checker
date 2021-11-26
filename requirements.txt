@@ -6,3 +6,4 @@ folium==0.12.1
 numpy==1.19.2
 pytest
 pytest-cov
+pylint
