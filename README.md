@@ -10,7 +10,6 @@ You can (but you don’t have to) complement the content data derived from the A
 
 Tasks: 
 1.	Using data from the GOV.UK content API, demonstrate your data wrangling and data science skills using Python and produce a 10 minute presentation (you’ll be timed) on your findings (the APIs are rate limited, we do not need you to demonstrate working with large volumes of data). To make use of the content API you need to know the base paths for the content you want to look-up. To give you a leg-up we provide a csv of base paths (check for errors!), the content of which contains mentions of ‘coronavirus’ or ‘covid’, sorted by “popularity” descending. (Note: you don’t have to use these pages).
-2.	Email a zip file of your presentation and all of your code used to complete the exercise with the subject line ‘Senior Data Scientist technical exercise’ to gov.uk-ops@digital.cabinet-office.gov.uk (cc. matthew.gregory@digital.cabinet-office.gov.uk) by 23:59 Tuesday 23rd November. The recruitment team will acknowledge receipt of your email and attachments.
 
 Expectation:
 You are required to demonstrate: 
