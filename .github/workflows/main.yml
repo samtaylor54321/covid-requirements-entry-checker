@@ -1,20 +1,32 @@
-name: Python 3.8.12
+name: COVID-19 Requirements Checker
 on: [push]
+
+permissions:
+  contents: read
+
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.8.12
-        uses: actions/setup-python@v1
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.8.12
+          python-version: '3.12'
+          cache: 'pip'
+
       - name: Install dependencies
         run: |
-          make install
-      - name: Lint
-        run: |
-          make lint
-      - name: Test
-        run: |
-          make test
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Format code
+        run: python -m black main.py
+
+      - name: Lint with pylint
+        run: python -m pylint --disable=R,C main.py
+
+      - name: Test with pytest
+        run: python -m pytest -vv
